@@ -4,232 +4,564 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>株価コンテスト</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; image-rendering: pixelated; }
 
+    /* ===== 背景：石ブロック風タイル ===== */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-      background: #f4f6f9;
-      color: #333;
-      padding: 24px 16px 60px;
+      font-family: 'Noto Sans JP', sans-serif;
+      background-color: #1a1a2a;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: #e0e0e0;
+      min-height: 100vh;
     }
 
-    h1 {
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    /* ===== ピクセルボーダー共通 ===== */
+    .pixel-box {
+      border: 4px solid #000;
+      box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.5),
+        inset 4px 4px 0 rgba(255,255,255,0.15),
+        4px 4px 0 #000;
+    }
+
+    /* ===== ヘッダー ===== */
+    .hero {
       text-align: center;
-      font-size: 1.6rem;
-      margin-bottom: 4px;
-      color: #1a1a2e;
+      margin-bottom: 40px;
+      padding: 24px 20px 20px;
+      background: #1e3a1e;
+      border: 4px solid #000;
+      box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.5),
+        inset 4px 4px 0 rgba(255,255,255,0.15),
+        6px 6px 0 #000;
+      position: relative;
     }
 
-    .updated {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #888;
-      margin-bottom: 32px;
+    /* 草ブロック上面の緑ライン */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 8px;
+      background: repeating-linear-gradient(
+        90deg,
+        #5d9e3a 0px, #5d9e3a 30px,
+        #4a8a2a 30px, #4a8a2a 32px
+      );
     }
 
-    h2 {
-      font-size: 1.1rem;
-      margin: 32px 0 12px;
-      color: #1a1a2e;
-      border-left: 4px solid #4a90d9;
-      padding-left: 10px;
+    .hero-icon {
+      display: flex;
+      justify-content: center;
+      margin: 8px 0 12px;
+      animation: pixel-bounce 0.6s steps(3) infinite alternate;
     }
 
-    h3 {
+    .hero-icon svg {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    @keyframes pixel-bounce {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-12px); }
+    }
+
+    .hero h1 {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #ffe066;
+      text-shadow:
+        4px 0 0 #b8860b,
+        0 4px 0 #b8860b,
+        4px 4px 0 #b8860b,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        2px 2px 0 #000;
+      letter-spacing: 4px;
+      margin: 4px 0 6px;
+    }
+
+    .hero .updated {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      color: #7f9f7f;
+      letter-spacing: 1px;
+    }
+
+    /* ===== セクション見出し ===== */
+    .section-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.75rem;
+      color: #fff;
+      background: #2a2a5a;
+      border: 4px solid #000;
+      box-shadow: 4px 4px 0 #000;
+      padding: 8px 16px;
+      display: inline-block;
+      margin: 40px 0 16px;
+      letter-spacing: 2px;
+    }
+
+    /* ===== ランキングカード ===== */
+    .ranking-cards { display: flex; flex-direction: column; gap: 10px; }
+
+    .rank-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border: 4px solid #000;
+      box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.4),
+        inset 4px 4px 0 rgba(255,255,255,0.15),
+        4px 4px 0 #000;
+      cursor: default;
+      transition: transform 0.1s steps(2);
+    }
+
+    .rank-card:hover { transform: translate(-2px, -2px); }
+    .rank-card:hover { box-shadow: inset -4px -4px 0 rgba(0,0,0,0.4), inset 4px 4px 0 rgba(255,255,255,0.15), 6px 6px 0 #000; }
+
+    /* Minecraftブロック配色 */
+    .rank-1 { background: linear-gradient(180deg, #c8a000 0%, #7a6000 50%, #5a4400 100%); }
+    .rank-2 { background: linear-gradient(180deg, #c0c0c0 0%, #808080 50%, #505050 100%); }
+    .rank-3 { background: linear-gradient(180deg, #c87840 0%, #7a4820 50%, #5a3010 100%); }
+    .rank-4 { background: linear-gradient(180deg, #607060 0%, #404840 50%, #303430 100%); }
+
+    .rank-medal { font-size: 2rem; min-width: 42px; text-align: center; }
+
+    .rank-name {
+      font-family: 'Press Start 2P', monospace;
       font-size: 1rem;
-      margin: 28px 0 10px;
-      color: #333;
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+      flex: 1;
     }
 
+    .rank-stats { text-align: right; }
+
+    .rank-pnl {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.85rem;
+    }
+
+    .rank-rate {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem;
+      margin-top: 4px;
+    }
+
+    .rank-sub {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+
+    /* ===== 個人テーブルセクション ===== */
+    .player-section { margin-top: 32px; }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border: 4px solid #000;
+      border-bottom: 0;
+      box-shadow: inset 4px 4px 0 rgba(255,255,255,0.15), inset -4px 0 0 rgba(0,0,0,0.4);
+    }
+
+    .p-header-1 { background: linear-gradient(90deg, #c8a000, #7a6000); }
+    .p-header-2 { background: linear-gradient(90deg, #909090, #505050); }
+    .p-header-3 { background: linear-gradient(90deg, #c87840, #6a3810); }
+    .p-header-4 { background: linear-gradient(90deg, #507050, #304030); }
+
+    .player-header .medal { font-size: 1.5rem; }
+
+    .player-header .player-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.75rem;
+      color: #fff;
+      text-shadow: 2px 2px 0 #000;
+      letter-spacing: 1px;
+    }
+
+    /* ===== テーブル ===== */
     .table-wrap { overflow-x: auto; }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      font-size: 0.9rem;
+      background: #1e2420;
+      font-size: 0.82rem;
+      border: 4px solid #000;
+      box-shadow: 4px 4px 0 #000;
     }
 
     thead th {
-      background: #1a1a2e;
-      color: #fff;
-      padding: 12px 14px;
+      background: #2a3a2a;
+      color: #7fcf7f;
+      padding: 10px 12px;
       text-align: center;
-      font-weight: 600;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 1px;
+      border-bottom: 4px solid #000;
       white-space: nowrap;
     }
 
     tbody td {
-      padding: 10px 14px;
+      padding: 9px 12px;
       text-align: center;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 2px solid #2a3a2a;
+      white-space: nowrap;
+      color: #c8d8c8;
+    }
+
+    tbody tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+    tbody tr:hover td { background: rgba(127,207,127,0.08); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .total-row td {
+      background: #2a4a2a !important;
+      font-weight: 700;
+      color: #afffaf;
+      border-top: 4px solid #3a7a3a;
+    }
+
+    .plus  { color: #7fff7f; text-shadow: 0 0 6px rgba(127,255,127,0.4); }
+    .minus { color: #ff7f7f; text-shadow: 0 0 6px rgba(255,127,127,0.4); }
+
+    /* ===== 縦棒グラフ ===== */
+    .chart-wrap {
+      background: #111a11;
+      border: 4px solid #000;
+      box-shadow: 4px 4px 0 #000;
+      padding: 20px 20px 16px;
+      margin-top: 4px;
+    }
+
+    .chart-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: #7fcf7f;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      text-align: right;
+    }
+
+    .chart-columns {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      gap: 8px;
+      height: 240px;
+      border-bottom: 4px solid #2a4a2a;
+      padding-bottom: 0;
+      position: relative;
+    }
+
+.chart-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .chart-val {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.42rem;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .chart-val.plus { color: #7fff7f; }
+
+    .chart-bar-bg {
+      width: 100%;
+      background: #1e2e1e;
+      border: 2px solid #2a4a2a;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      height: var(--bar-max);
+    }
+
+    .chart-bar {
+      width: 100%;
+      background: currentColor;
+      animation: bar-grow-v 1.2s steps(20) forwards;
+      height: 0;
+    }
+
+    @keyframes bar-grow-v {
+      from { height: 0; }
+      to   { height: var(--bar-h); }
+    }
+
+    .bar-1 { color: #FFD700; }
+    .bar-2 { color: #c0c0c0; }
+    .bar-3 { color: #cd853f; }
+    .bar-4 { color: #607060; }
+
+    .chart-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.5rem;
+      color: #fff;
+      text-shadow: 1px 1px 0 #000;
+      text-align: center;
+      margin-top: 8px;
       white-space: nowrap;
     }
 
-    tbody tr:last-child td { border-bottom: none; }
-
-    tbody tr:hover { background: #f9fbff; }
-
-    .total-row td {
-      background: #eef3fb;
-      font-weight: 700;
-      border-top: 2px solid #c0d4f0;
-    }
-
-    .plus  { color: #0a7c42; }
-    .minus { color: #c0392b; }
-
-    .rank-col { font-size: 1.1rem; }
-
-    .medal-1 { color: #d4a017; }
-    .medal-2 { color: #7f8c8d; }
-    .medal-3 { color: #a0522d; }
-
-    .section-divider {
-      border: none;
-      border-top: 2px dashed #dde3ec;
+    /* ===== ピクセル区切り ===== */
+    .pixel-divider {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
       margin: 40px 0;
     }
 
+    .pixel-divider span {
+      display: inline-block;
+      width: 16px; height: 16px;
+      background: #5d9e3a;
+      border: 2px solid #000;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .pixel-divider span:nth-child(2n) { background: #8B6914; }
+    .pixel-divider span:nth-child(3n) { background: #607060; }
+
+    /* ===== コイン点滅アニメ ===== */
+    @keyframes coin-spin {
+      0%   { transform: scaleX(1); }
+      50%  { transform: scaleX(0.1); }
+      100% { transform: scaleX(1); }
+    }
+
+    .coin { display: inline-block; animation: coin-spin 1.2s steps(4) infinite; }
+
     @media (max-width: 600px) {
-      table { font-size: 0.78rem; }
-      thead th, tbody td { padding: 8px 8px; }
+      .hero h1 { font-size: 0.85rem; }
+      .rank-name { font-size: 0.75rem; }
+      .rank-pnl { font-size: 0.65rem; }
+      .rank-rate { font-size: 0.5rem; }
+      table { font-size: 0.72rem; }
+      thead th { font-size: 0.42rem; }
+      thead th, tbody td { padding: 7px 7px; }
     }
   </style>
 </head>
 <body>
+<div class="container">
 
-<h1>📈 株価コンテスト</h1>
-<p class="updated">集計日：2026年3月1日</p>
+  <!-- ヘッダー -->
+  <div class="hero">
+    <div class="hero-icon">
+      <span style="font-size:5rem;">💰</span>
+    </div>
+    <h1>株価コンテスト</h1>
+    <p class="updated">2026.03.01 UPDATE</p>
+  </div>
 
-<!-- ===== 全員サマリー ===== -->
-<h2>全員サマリー</h2>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr>
-      <th>順位</th>
-      <th>名前</th>
-      <th>投資額</th>
-      <th>総評価額</th>
-      <th>総損益</th>
-      <th>総損益率</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="rank-col medal-1">🥇 1位</td>
-      <td>慶子</td>
-      <td>52,180円</td>
-      <td>64,944円</td>
-      <td class="plus"><strong>+12,764円</strong></td>
-      <td class="plus"><strong>+24.46%</strong></td>
-    </tr>
-    <tr>
-      <td class="rank-col medal-2">🥈 2位</td>
-      <td>健人</td>
-      <td>49,821円</td>
-      <td>56,814円</td>
-      <td class="plus"><strong>+6,993円</strong></td>
-      <td class="plus"><strong>+14.04%</strong></td>
-    </tr>
-    <tr>
-      <td class="rank-col medal-3">🥉 3位</td>
-      <td>亮太</td>
-      <td>51,692円</td>
-      <td>54,480円</td>
-      <td class="plus"><strong>+2,788円</strong></td>
-      <td class="plus"><strong>+5.39%</strong></td>
-    </tr>
-    <tr>
-      <td class="rank-col">4位</td>
-      <td>拓哉</td>
-      <td>50,546円</td>
-      <td>51,245円</td>
-      <td class="plus"><strong>+699円</strong></td>
-      <td class="plus"><strong>+1.38%</strong></td>
-    </tr>
-  </tbody>
-</table>
+  <!-- ランキング -->
+  <div class="section-title">▶ RANKING</div>
+
+  <div class="ranking-cards">
+
+    <div class="rank-card rank-1">
+      <div class="rank-medal">🥇</div>
+      <div class="rank-name">Keiko<svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="1" height="1" fill="#FFD700"/><rect x="2" y="0" width="1" height="1" fill="#FFD700"/><rect x="4" y="0" width="1" height="1" fill="#FFD700"/><rect x="0" y="1" width="6" height="1" fill="#FFD700"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="1" y="4" width="4" height="1" fill="#D455A8"/><rect x="0" y="5" width="6" height="3" fill="#D455A8"/></svg></div>
+      <div class="rank-stats">
+        <div class="rank-pnl plus">+12,764円</div>
+        <div class="rank-rate plus">+24.46%</div>
+        <div class="rank-sub">52,180 → 64,944円</div>
+      </div>
+    </div>
+
+    <div class="rank-card rank-2">
+      <div class="rank-medal">🥈</div>
+      <div class="rank-name">Kento<svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="6" height="2" fill="#909090"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#909090"/><rect x="5" y="2" width="1" height="2" fill="#909090"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#4488CC"/><rect x="2" y="4" width="2" height="2" fill="#6699DD"/></svg></div>
+      <div class="rank-stats">
+        <div class="rank-pnl plus">+6,993円</div>
+        <div class="rank-rate plus">+14.04%</div>
+        <div class="rank-sub">49,821 → 56,814円</div>
+      </div>
+    </div>
+
+    <div class="rank-card rank-3">
+      <div class="rank-medal">🥉</div>
+      <div class="rank-name">Ryota<svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="6" height="1" fill="#8B4513"/><rect x="1" y="1" width="4" height="1" fill="#8B4513"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#2D8B2D"/></svg></div>
+      <div class="rank-stats">
+        <div class="rank-pnl plus">+2,788円</div>
+        <div class="rank-rate plus">+5.39%</div>
+        <div class="rank-sub">51,692 → 54,480円</div>
+      </div>
+    </div>
+
+    <div class="rank-card rank-4">
+      <div class="rank-medal">4️⃣</div>
+      <div class="rank-name">Takuya<svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="6" height="1" fill="#E8C000"/><rect x="1" y="1" width="4" height="1" fill="#E8C000"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#4455AA"/><rect x="2" y="4" width="2" height="1" fill="#7788CC"/></svg></div>
+      <div class="rank-stats">
+        <div class="rank-pnl plus">+699円</div>
+        <div class="rank-rate plus">+1.38%</div>
+        <div class="rank-sub">50,546 → 51,245円</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 棒グラフ -->
+  <div class="chart-wrap">
+    <div class="chart-label">▶ 損益額チャート</div>
+
+    <div class="chart-columns">
+      <div class="chart-col">
+        <div class="chart-val plus">+12,764円</div>
+        <div class="chart-bar-bg" style="--bar-max: 220px;">
+          <div class="chart-bar bar-1" style="--bar-h: 220px;"></div>
+        </div>
+      </div>
+      <div class="chart-col">
+        <div class="chart-val plus">+6,993円</div>
+        <div class="chart-bar-bg" style="--bar-max: 121px;">
+          <div class="chart-bar bar-2" style="--bar-h: 121px;"></div>
+        </div>
+      </div>
+      <div class="chart-col">
+        <div class="chart-val plus">+2,788円</div>
+        <div class="chart-bar-bg" style="--bar-max: 48px;">
+          <div class="chart-bar bar-3" style="--bar-h: 48px;"></div>
+        </div>
+      </div>
+      <div class="chart-col">
+        <div class="chart-val plus">+699円</div>
+        <div class="chart-bar-bg" style="--bar-max: 12px;">
+          <div class="chart-bar bar-4" style="--bar-h: 12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-around; padding-top:8px;">
+      <div class="chart-name">🥇 Keiko<svg xmlns="http://www.w3.org/2000/svg" width="14" height="18" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:3px;"><rect x="0" y="0" width="1" height="1" fill="#FFD700"/><rect x="2" y="0" width="1" height="1" fill="#FFD700"/><rect x="4" y="0" width="1" height="1" fill="#FFD700"/><rect x="0" y="1" width="6" height="1" fill="#FFD700"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="4" width="4" height="1" fill="#D455A8"/><rect x="0" y="5" width="6" height="3" fill="#D455A8"/></svg></div>
+      <div class="chart-name">🥈 Kento<svg xmlns="http://www.w3.org/2000/svg" width="14" height="18" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:3px;"><rect x="0" y="0" width="6" height="2" fill="#909090"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#909090"/><rect x="5" y="2" width="1" height="2" fill="#909090"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#4488CC"/><rect x="2" y="4" width="2" height="2" fill="#6699DD"/></svg></div>
+      <div class="chart-name">🥉 Ryota<svg xmlns="http://www.w3.org/2000/svg" width="14" height="18" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:3px;"><rect x="0" y="0" width="6" height="1" fill="#8B4513"/><rect x="1" y="1" width="4" height="1" fill="#8B4513"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#2D8B2D"/></svg></div>
+      <div class="chart-name">4️⃣ Takuya<svg xmlns="http://www.w3.org/2000/svg" width="14" height="18" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:3px;"><rect x="0" y="0" width="6" height="1" fill="#E8C000"/><rect x="1" y="1" width="4" height="1" fill="#E8C000"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#4455AA"/><rect x="2" y="4" width="2" height="1" fill="#7788CC"/></svg></div>
+    </div>
+  </div>
+
+  <!-- ピクセル区切り -->
+  <div class="pixel-divider">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- 詳細 -->
+  <div class="section-title">▶ DETAIL</div>
+
+  <!-- Keiko -->
+  <div class="player-section">
+    <div class="player-header p-header-1">
+      <span class="medal">🥇</span>
+      <span class="player-title">1ST｜Keiko<svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="1" height="1" fill="#FFD700"/><rect x="2" y="0" width="1" height="1" fill="#FFD700"/><rect x="4" y="0" width="1" height="1" fill="#FFD700"/><rect x="0" y="1" width="6" height="1" fill="#FFD700"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="1" y="4" width="4" height="1" fill="#D455A8"/><rect x="0" y="5" width="6" height="3" fill="#D455A8"/></svg></span>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr></thead>
+      <tbody>
+        <tr><td>サントリーBF</td><td>4,883円</td><td>4,917円</td><td class="plus">+34円</td><td class="plus">+0.70%</td></tr>
+        <tr><td>クラシコム</td><td>10,809円</td><td>19,350円</td><td class="plus">+8,541円</td><td class="plus">+79.02%</td></tr>
+        <tr><td>良品計画</td><td>14,910円</td><td>17,985円</td><td class="plus">+3,075円</td><td class="plus">+20.62%</td></tr>
+        <tr><td>iFreeNEXT FANG+①</td><td>12,578円</td><td>11,361円</td><td class="minus">-1,217円</td><td class="minus">-9.68%</td></tr>
+        <tr><td>iFreeNEXT FANG+②</td><td>9,000円</td><td>11,331円</td><td class="plus">+2,331円</td><td class="plus">+25.90%</td></tr>
+        <tr class="total-row"><td><strong>合計</strong></td><td><strong>52,180円</strong></td><td><strong>64,944円</strong></td><td class="plus"><strong>+12,764円</strong></td><td class="plus"><strong>+24.46%</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Kento -->
+  <div class="player-section">
+    <div class="player-header p-header-2">
+      <span class="medal">🥈</span>
+      <span class="player-title">2ND｜Kento<svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="6" height="2" fill="#909090"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#909090"/><rect x="5" y="2" width="1" height="2" fill="#909090"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#4488CC"/><rect x="2" y="4" width="2" height="2" fill="#6699DD"/></svg></span>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr></thead>
+      <tbody>
+        <tr><td>トヨタ自</td><td>6,144円</td><td>7,650円</td><td class="plus">+1,506円</td><td class="plus">+24.51%</td></tr>
+        <tr><td>良品計画</td><td>5,964円</td><td>7,194円</td><td class="plus">+1,230円</td><td class="plus">+20.62%</td></tr>
+        <tr><td>スクエニHD</td><td>6,158円</td><td>5,149円</td><td class="minus">-1,009円</td><td class="minus">-16.39%</td></tr>
+        <tr><td>eMAXIS Slim S&amp;P500</td><td>13,755円</td><td>14,417円</td><td class="plus">+662円</td><td class="plus">+4.81%</td></tr>
+        <tr><td>iFreeNEXT FANG+</td><td>17,800円</td><td>22,404円</td><td class="plus">+4,604円</td><td class="plus">+25.87%</td></tr>
+        <tr class="total-row"><td><strong>合計</strong></td><td><strong>49,821円</strong></td><td><strong>56,814円</strong></td><td class="plus"><strong>+6,993円</strong></td><td class="plus"><strong>+14.04%</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Ryota -->
+  <div class="player-section">
+    <div class="player-header p-header-3">
+      <span class="medal">🥉</span>
+      <span class="player-title">3RD｜Ryota<svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="6" height="1" fill="#8B4513"/><rect x="1" y="1" width="4" height="1" fill="#8B4513"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#2D8B2D"/></svg></span>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr></thead>
+      <tbody>
+        <tr><td>INPEX</td><td>2,018円</td><td>3,800円</td><td class="plus">+1,782円</td><td class="plus">+88.31%</td></tr>
+        <tr><td>ソニーグループ</td><td>2,850円</td><td>3,643円</td><td class="plus">+793円</td><td class="plus">+27.82%</td></tr>
+        <tr><td>三菱重工</td><td>2,867円</td><td>5,014円</td><td class="plus">+2,147円</td><td class="plus">+74.89%</td></tr>
+        <tr><td>ホンダ</td><td>1,475円</td><td>1,584円</td><td class="plus">+109円</td><td class="plus">+7.35%</td></tr>
+        <tr><td>ソニーFG</td><td>739円</td><td>159円</td><td class="minus">-580円</td><td class="minus">-78.39%</td></tr>
+        <tr><td>iFreeNEXT FANG+</td><td>41,743円</td><td>40,280円</td><td class="minus">-1,463円</td><td class="minus">-3.50%</td></tr>
+        <tr class="total-row"><td><strong>合計</strong></td><td><strong>51,692円</strong></td><td><strong>54,480円</strong></td><td class="plus"><strong>+2,788円</strong></td><td class="plus"><strong>+5.39%</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Takuya -->
+  <div class="player-section">
+    <div class="player-header p-header-4">
+      <span class="medal">4️⃣</span>
+      <span class="player-title">4TH｜Takuya<svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 6 8" style="image-rendering:pixelated;vertical-align:middle;margin-left:4px;"><rect x="0" y="0" width="6" height="1" fill="#E8C000"/><rect x="1" y="1" width="4" height="1" fill="#E8C000"/><rect x="1" y="2" width="4" height="2" fill="#FFD8A0"/><rect x="0" y="2" width="1" height="2" fill="#C8961E"/><rect x="5" y="2" width="1" height="2" fill="#C8961E"/><rect x="1" y="2" width="1" height="1" fill="#222"/><rect x="4" y="2" width="1" height="1" fill="#222"/><rect x="0" y="4" width="6" height="4" fill="#4455AA"/><rect x="2" y="4" width="2" height="1" fill="#7788CC"/></svg></span>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr></thead>
+      <tbody>
+        <tr><td>東北電力</td><td>5,634円</td><td>6,477円</td><td class="plus">+843円</td><td class="plus">+14.95%</td></tr>
+        <tr><td>スクエニHD</td><td>6,926円</td><td>7,723円</td><td class="plus">+797円</td><td class="plus">+11.50%</td></tr>
+        <tr><td>エヌビディア</td><td>30,686円</td><td>27,607円</td><td class="minus">-3,079円</td><td class="minus">-10.03%</td></tr>
+        <tr><td>eMAXIS Slim S&amp;P500</td><td>7,300円</td><td>9,438円</td><td class="plus">+2,138円</td><td class="plus">+29.29%</td></tr>
+        <tr class="total-row"><td><strong>合計</strong></td><td><strong>50,546円</strong></td><td><strong>51,245円</strong></td><td class="plus"><strong>+699円</strong></td><td class="plus"><strong>+1.38%</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
 </div>
-
-<hr class="section-divider">
-
-<!-- ===== 慶子 ===== -->
-<h3>🥇 1位｜慶子</h3>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>サントリーBF</td><td>4,883円</td><td>4,917円</td><td class="plus">+34円</td><td class="plus">+0.70%</td></tr>
-    <tr><td>クラシコム</td><td>10,809円</td><td>19,350円</td><td class="plus">+8,541円</td><td class="plus">+79.02%</td></tr>
-    <tr><td>良品計画</td><td>14,910円</td><td>17,985円</td><td class="plus">+3,075円</td><td class="plus">+20.62%</td></tr>
-    <tr><td>iFreeNEXT FANG+①</td><td>12,578円</td><td>11,361円</td><td class="minus">-1,217円</td><td class="minus">-9.68%</td></tr>
-    <tr><td>iFreeNEXT FANG+②</td><td>9,000円</td><td>11,331円</td><td class="plus">+2,331円</td><td class="plus">+25.90%</td></tr>
-    <tr class="total-row"><td><strong>合計</strong></td><td><strong>52,180円</strong></td><td><strong>64,944円</strong></td><td class="plus"><strong>+12,764円</strong></td><td class="plus"><strong>+24.46%</strong></td></tr>
-  </tbody>
-</table>
-</div>
-
-<!-- ===== 健人 ===== -->
-<h3>🥈 2位｜健人</h3>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>トヨタ自</td><td>6,144円</td><td>7,650円</td><td class="plus">+1,506円</td><td class="plus">+24.51%</td></tr>
-    <tr><td>良品計画</td><td>5,964円</td><td>7,194円</td><td class="plus">+1,230円</td><td class="plus">+20.62%</td></tr>
-    <tr><td>スクエニHD</td><td>6,158円</td><td>5,149円</td><td class="minus">-1,009円</td><td class="minus">-16.39%</td></tr>
-    <tr><td>eMAXIS Slim 米国株式(S&amp;P500)</td><td>13,755円</td><td>14,417円</td><td class="plus">+662円</td><td class="plus">+4.81%</td></tr>
-    <tr><td>iFreeNEXT FANG+インデックス</td><td>17,800円</td><td>22,404円</td><td class="plus">+4,604円</td><td class="plus">+25.87%</td></tr>
-    <tr class="total-row"><td><strong>合計</strong></td><td><strong>49,821円</strong></td><td><strong>56,814円</strong></td><td class="plus"><strong>+6,993円</strong></td><td class="plus"><strong>+14.04%</strong></td></tr>
-  </tbody>
-</table>
-</div>
-
-<!-- ===== 亮太 ===== -->
-<h3>🥉 3位｜亮太</h3>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>INPEX</td><td>2,018円</td><td>3,800円</td><td class="plus">+1,782円</td><td class="plus">+88.31%</td></tr>
-    <tr><td>ソニーグループ</td><td>2,850円</td><td>3,643円</td><td class="plus">+793円</td><td class="plus">+27.82%</td></tr>
-    <tr><td>三菱重工</td><td>2,867円</td><td>5,014円</td><td class="plus">+2,147円</td><td class="plus">+74.89%</td></tr>
-    <tr><td>ホンダ</td><td>1,475円</td><td>1,584円</td><td class="plus">+109円</td><td class="plus">+7.35%</td></tr>
-    <tr><td>ソニーFG</td><td>739円</td><td>159円</td><td class="minus">-580円</td><td class="minus">-78.39%</td></tr>
-    <tr><td>iFreeNEXT FANG+インデックス</td><td>41,743円</td><td>40,280円</td><td class="minus">-1,463円</td><td class="minus">-3.50%</td></tr>
-    <tr class="total-row"><td><strong>合計</strong></td><td><strong>51,692円</strong></td><td><strong>54,480円</strong></td><td class="plus"><strong>+2,788円</strong></td><td class="plus"><strong>+5.39%</strong></td></tr>
-  </tbody>
-</table>
-</div>
-
-<!-- ===== 拓哉 ===== -->
-<h3>4位｜拓哉</h3>
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr><th>銘柄</th><th>投資額</th><th>評価額</th><th>損益</th><th>損益率</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>東北電力</td><td>5,634円</td><td>6,477円</td><td class="plus">+843円</td><td class="plus">+14.95%</td></tr>
-    <tr><td>スクエニHD</td><td>6,926円</td><td>7,723円</td><td class="plus">+797円</td><td class="plus">+11.50%</td></tr>
-    <tr><td>エヌビディア</td><td>30,686円</td><td>27,607円</td><td class="minus">-3,079円</td><td class="minus">-10.03%</td></tr>
-    <tr><td>eMAXIS Slim 米国株式(S&amp;P500)</td><td>7,300円</td><td>9,438円</td><td class="plus">+2,138円</td><td class="plus">+29.29%</td></tr>
-    <tr class="total-row"><td><strong>合計</strong></td><td><strong>50,546円</strong></td><td><strong>51,245円</strong></td><td class="plus"><strong>+699円</strong></td><td class="plus"><strong>+1.38%</strong></td></tr>
-  </tbody>
-</table>
-</div>
-
 </body>
 </html>
